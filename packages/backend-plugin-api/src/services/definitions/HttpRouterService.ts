@@ -22,11 +22,16 @@ export interface HttpRouterServiceAuthPolicy {
   allow: 'unauthenticated' | 'user-cookie';
 }
 
+/** @public */
+export interface HttpRouterHealthCheckConfig {
+  handler: () => Promise<any>;
+}
+
 /**
  * @public
  */
 export interface HttpRouterService {
   use(handler: Handler): void;
-
+  healthCheckConfig(healthCheckOptions: HttpRouterHealthCheckConfig): void;
   addAuthPolicy(policy: HttpRouterServiceAuthPolicy): void;
 }
