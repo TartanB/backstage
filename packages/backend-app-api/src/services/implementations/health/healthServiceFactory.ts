@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Backstage Authors
+ * Copyright 2024 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import { Handler } from 'express';
+import {
+  coreServices,
+  createServiceFactory,
+} from '@backstage/backend-plugin-api';
+import { createHealthRouter } from './createHealthRouter';
 
-/** @public */
-export interface HttpRouterServiceAuthPolicy {
-  path: string;
-  allow: 'unauthenticated' | 'user-cookie';
-}
+export const healthServiceFactory = createServiceFactory({
+  service: coreServices.health,
+  deps: {
+    rootHttpRouter: coreServices.rootHttpRouter,
+    lifecycle: coreServices.rootLifecycle,
+  },
+  async factory({ lifecycle, rootHttpRouter }) {
+    rootHttpRouter.use('.backstage/health', createHealthRouter({ lifecycle }));
 
-/**
- * @public
- */
-export interface HttpRouterService {
-  use(handler: Handler): void;
-  addAuthPolicy(policy: HttpRouterServiceAuthPolicy): void;
-}
+    return {};
+  },
+});
