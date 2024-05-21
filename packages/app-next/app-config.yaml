@@ -11,6 +11,34 @@ app:
   extensions:
     # - apis.plugin.graphiql.browse.gitlab: true
     # - graphiql-endpoint:graphiql/gitlab: true
+    - nav-item:techdocs:
+        config:
+          title: 'All'
+    - app/nav:
+        config:
+          pinner: true
+          groups:
+            - title: 'Search'
+              divider: true
+              items:
+                - nav-item:search
+            - title: 'Docs'
+              icon: 'techdocs'
+              type: 'drawer'
+              divider: true
+              items:
+                - nav-item:techdocs
+                - nav-item:api-docs
+            - title: 'Create'
+              spacer: true
+              divider: true
+              items:
+                - nav-item:scaffolder
+                - nav-item:catalog
+            - title: 'Admin'
+              items:
+                - nav-item:app-visualizer
+                - nav-item:user-settings
 
     # Entity page cards
     - entity-card:catalog/about

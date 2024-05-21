@@ -22,6 +22,9 @@ import {
   useRouteRef,
   createNavItemExtension,
   createNavLogoExtension,
+  createSchemaFromZod,
+  iconsApiRef,
+  useApi,
 } from '@backstage/frontend-plugin-api';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -31,6 +34,9 @@ import {
   sidebarConfig,
   SidebarDivider,
   SidebarItem,
+  SidebarGroup,
+  SidebarSubmenu,
+  SidebarSpace,
 } from '@backstage/core-components';
 // eslint-disable-next-line @backstage/no-relative-monorepo-imports
 import LogoIcon from '../../../app/src/components/Root/LogoIcon';
@@ -69,19 +75,43 @@ const SidebarLogo = (
   );
 };
 
-const SidebarNavItem = (
+function SidebarIcon(props: { id: string }) {
+  const iconsApi = useApi(iconsApiRef);
+  const Component = iconsApi.getIcon(props.id);
+  return Component ? <Component /> : null;
+}
+
+function SidebarNavItem(
   props: (typeof createNavItemExtension.targetDataRef)['T'],
-) => {
+) {
   const { icon: Icon, title, routeRef } = props;
   const to = useRouteRef(routeRef)();
   // TODO: Support opening modal, for example, the search one
   return <SidebarItem to={to} icon={Icon} text={title} />;
-};
+}
 
 export const AppNav = createExtension({
   namespace: 'app',
   name: 'nav',
   attachTo: { id: 'app/layout', input: 'nav' },
+  configSchema: createSchemaFromZod(z => {
+    const groupSchema = z
+      .object({
+        type: z.literal('drawer').optional(),
+        title: z.string().default(''),
+        icon: z.string().optional(),
+        divider: z.boolean().default(false),
+        spacer: z.boolean().default(false),
+      })
+      .extend({
+        items: z.lazy(() => z.array(z.string().or(groupSchema)).default([])),
+      });
+
+    return z.object({
+      pinner: z.boolean().default(false),
+      groups: z.array(groupSchema).default([]),
+    });
+  }),
   inputs: {
     items: createExtensionInput({
       target: createNavItemExtension.targetDataRef,
@@ -99,15 +129,64 @@ export const AppNav = createExtension({
   output: {
     element: coreExtensionData.reactElement,
   },
-  factory({ inputs }) {
+  factory({ inputs, config }) {
+    const inputsByItem = inputs.items.reduce(
+      (items, item) => ({
+        ...items,
+        [item.node.spec.id]: item,
+      }),
+      {},
+    );
+
+    if (!config.groups.length) {
+      return {
+        element: (
+          <Sidebar>
+            <SidebarLogo {...inputs.logos?.output.elements} />
+            {inputs.items.map((item, index) => (
+              <SidebarNavItem {...item.output.target} key={index} />
+            ))}
+          </Sidebar>
+        ),
+      };
+    }
+
+    // TODO: Fix mobile view
+    // TODO: Add support for pinner
     return {
       element: (
         <Sidebar>
           <SidebarLogo {...inputs.logos?.output.elements} />
-          <SidebarDivider />
-          {inputs.items.map((item, index) => (
-            <SidebarNavItem {...item.output.target} key={index} />
-          ))}
+          {config.groups.map(function renderGroup(group) {
+            const { type, title, icon, items, spacer, divider } = group;
+            const Icon = () => (icon ? <SidebarIcon id={icon} /> : null);
+
+            const children = (
+              <SidebarGroup key={title} label={title} icon={<Icon />}>
+                {items.map(item => {
+                  if (typeof item !== 'string') return renderGroup(item);
+                  const input = inputsByItem[item];
+                  return input ? (
+                    <SidebarNavItem {...input.output.target} key={item} />
+                  ) : null;
+                })}
+              </SidebarGroup>
+            );
+
+            return (
+              <>
+                {type !== 'drawer' ? (
+                  children
+                ) : (
+                  <SidebarItem icon={Icon} text={title}>
+                    <SidebarSubmenu title={title}>{children}</SidebarSubmenu>
+                  </SidebarItem>
+                )}
+                {spacer ? <SidebarSpace /> : null}
+                {divider ? <SidebarDivider /> : null}
+              </>
+            );
+          })}
         </Sidebar>
       ),
     };
