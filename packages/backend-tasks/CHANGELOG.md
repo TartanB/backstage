@@ -1,5 +1,11 @@
 # @backstage/backend-tasks
 
+## 0.5.24-next.1
+
+### Patch Changes
+
+- ed473cd: Updated the `TaskScheduleDefinitionConfig` deprecated comment to point to `SchedulerServiceTaskScheduleDefinitionConfig`
+
 ## 0.5.24-next.0
 
 ### Patch Changes

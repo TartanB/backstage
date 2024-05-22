@@ -1,5 +1,16 @@
 # @backstage/plugin-notifications-backend
 
+## 0.3.0-next.1
+
+### Minor Changes
+
+- 07a789b: adding filtering of notifications by processors
+
+### Patch Changes
+
+- Updated dependencies
+  - @backstage/plugin-notifications-node@0.2.0-next.1
+
 ## 0.2.2-next.0
 
 ### Patch Changes

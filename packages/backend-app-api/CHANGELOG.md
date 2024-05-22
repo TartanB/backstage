@@ -1,5 +1,13 @@
 # @backstage/backend-app-api
 
+## 0.7.6-next.1
+
+### Patch Changes
+
+- 398b82a: Add support for JWKS tokens in ExternalTokenHandler.
+- Updated dependencies
+  - @backstage/backend-tasks@0.5.24-next.1
+
 ## 0.7.6-next.0
 
 ### Patch Changes

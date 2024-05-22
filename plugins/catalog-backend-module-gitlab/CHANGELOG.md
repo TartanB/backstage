@@ -1,5 +1,13 @@
 # @backstage/plugin-catalog-backend-module-gitlab
 
+## 0.3.17-next.1
+
+### Patch Changes
+
+- 150fc77: Fixed an issue in `GitlabOrgDiscoveryEntityProvider` where a missing `orgEnabled` config key was throwing an error.
+- Updated dependencies
+  - @backstage/backend-tasks@0.5.24-next.1
+
 ## 0.3.17-next.0
 
 ### Patch Changes
